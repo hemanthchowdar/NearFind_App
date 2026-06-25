@@ -18,7 +18,6 @@ import { CommonActions } from '@react-navigation/native';
 
 type Props = NativeStackScreenProps<RootStackParamList, 'OrderStatus'>;
 
-// Human-friendly status labels and hero descriptions (Active states)
 const HERO_STATUS_INFO: Record<string, { title: string; desc: string }> = {
   [OrderStatus.Placed]: {
     title: 'Placed',
@@ -46,7 +45,6 @@ const HERO_STATUS_INFO: Record<string, { title: string; desc: string }> = {
   },
 };
 
-// Rejection hero info
 const REJECTED_HERO_INFO: Record<string, { title: string; desc: string }> = {
   [OrderStatus.Rejected]: {
     title: 'Order Rejected',
@@ -62,7 +60,6 @@ const REJECTED_HERO_INFO: Record<string, { title: string; desc: string }> = {
   },
 };
 
-// Standard active milestones
 const ACTIVE_MILESTONES = [
   OrderStatus.Placed,
   OrderStatus.Accepted,
@@ -120,7 +117,6 @@ export default function OrderStatusScreen({ route, navigation }: Props) {
     order.status as OrderStatus
   );
 
-  // Helper to format timestamp from status history
   const getMilestoneTime = (status: string) => {
     const entry = order.statusHistory?.find((h) => h.status === status);
     if (!entry || !entry.timestamp) return null;
@@ -167,14 +163,12 @@ export default function OrderStatusScreen({ route, navigation }: Props) {
     }
   };
 
-  // ─── RENDER FAILED / REJECTED FLOW ─────────────────────────────────────────
   if (isFailed) {
     const heroInfo = REJECTED_HERO_INFO[order.status] || {
       title: 'Order Cancelled',
       desc: 'Your refund is being processed.',
     };
 
-    // Specific labels for the failed steps timeline
     const failedReasonLabel = 
       order.status === OrderStatus.Rejected ? 'Out of stock' :
       order.status === OrderStatus.AutoCancelled ? 'Timeout' : 'No partner available';
@@ -341,7 +335,6 @@ export default function OrderStatusScreen({ route, navigation }: Props) {
     );
   }
 
-  // ─── RENDER ACTIVE TRACKING FLOW ───────────────────────────────────────────
   let currentIndex = ACTIVE_MILESTONES.indexOf(order.status as OrderStatus);
   if (currentIndex === -1) currentIndex = 0;
 
@@ -576,7 +569,6 @@ const styles = StyleSheet.create({
     paddingHorizontal: 20,
   },
 
-  // Hero Section
   heroSection: {
     alignItems: 'center',
     marginVertical: 20,
@@ -608,7 +600,6 @@ const styles = StyleSheet.create({
     maxWidth: '85%',
   },
 
-  // Error icon circle for failed state
   errorIconCircleOuter: {
     width: 64,
     height: 64,
@@ -619,13 +610,12 @@ const styles = StyleSheet.create({
     marginBottom: 12,
   },
 
-  // Timeline
   card: {
     backgroundColor: Colors.white,
     borderRadius: 24,
     padding: 24,
     marginBottom: 16,
-    // subtle shadow
+    
     shadowColor: '#6C2BD9',
     shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.03,
@@ -775,7 +765,6 @@ const styles = StyleSheet.create({
     color: Colors.textMuted,
   },
 
-  // Order Details / Refund Card
   orderDetailsCard: {
     paddingBottom: 20,
   },
@@ -902,7 +891,6 @@ const styles = StyleSheet.create({
     color: Colors.white,
   },
 
-  // Mock thumbnails row
   mockThumbnailsRow: {
     flexDirection: 'row',
     gap: 10,
@@ -918,7 +906,6 @@ const styles = StyleSheet.create({
     borderColor: '#DCD4EC',
   },
 
-  // Need help box (failed flow)
   needHelpBox: {
     flexDirection: 'row',
     justifyContent: 'space-between',
@@ -955,7 +942,6 @@ const styles = StyleSheet.create({
     marginTop: 2,
   },
 
-  // Action buttons (failed flow)
   actionButtonsContainer: {
     gap: 12,
     marginBottom: 20,
@@ -991,7 +977,6 @@ const styles = StyleSheet.create({
     color: Colors.textPrimary,
   },
 
-  // Bottom Tab Bar
   bottomTabBarContainer: {
     position: 'absolute',
     bottom: 0,

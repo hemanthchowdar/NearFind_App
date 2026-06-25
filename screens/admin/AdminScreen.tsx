@@ -27,14 +27,11 @@ type Props = NativeStackScreenProps<RootStackParamList, 'AdminDashboard'>;
 export default function AdminScreen({ route, navigation }: Props) {
   const [activeTab, setActiveTab] = useState<'Home' | 'Search' | 'Reports' | 'Settings'>('Home');
 
-  // Seeding state (Settings Tab)
   const [seeding, setSeeding] = useState(false);
 
-  // Search state (Search Tab)
   const [searchQuery, setSearchQuery] = useState('');
   const [searchFilter, setSearchFilter] = useState<'All' | 'Orders' | 'Retailers' | 'Couriers'>('All');
 
-  // Reports state (Reports Tab)
   const [reportPeriod, setReportPeriod] = useState<'7Days' | 'Monthly' | 'Quarterly'>('7Days');
 
   const handleSeed = async () => {
@@ -71,9 +68,6 @@ export default function AdminScreen({ route, navigation }: Props) {
     );
   };
 
-  // ─── TAB RENDERS ───────────────────────────────────────────────────────────
-
-  // Tab 1: Global Operations Home Page (Screenshot 1 Layout)
   const renderHomeTab = () => {
     return (
       <ScrollView style={styles.container} contentContainerStyle={styles.contentContainer} showsVerticalScrollIndicator={false}>
@@ -248,7 +242,6 @@ export default function AdminScreen({ route, navigation }: Props) {
     );
   };
 
-  // Tab 2: Admin Search Page (Screenshot 2 Layout)
   const renderSearchTab = () => {
     return (
       <ScrollView style={styles.container} contentContainerStyle={styles.contentContainer} showsVerticalScrollIndicator={false}>
@@ -396,7 +389,6 @@ export default function AdminScreen({ route, navigation }: Props) {
     );
   };
 
-  // Tab 3: Admin Reports Page (Screenshot 3 Layout)
   const renderReportsTab = () => {
     return (
       <ScrollView style={styles.container} contentContainerStyle={styles.contentContainer} showsVerticalScrollIndicator={false}>
@@ -641,7 +633,6 @@ export default function AdminScreen({ route, navigation }: Props) {
     );
   };
 
-  // Tab 4: Admin Settings Tab (Database Seeder)
   const renderSettingsTab = () => {
     return (
       <View style={styles.centerContainer}>
@@ -851,7 +842,6 @@ const styles = StyleSheet.create({
     zIndex: 1,
   },
 
-  // Stats Grid (Tab 1)
   statsGrid: {
     marginBottom: 16,
     gap: 10,
@@ -908,7 +898,6 @@ const styles = StyleSheet.create({
     fontWeight: '600',
   },
 
-  // Map preview
   mapBannerContainer: {
     height: 180,
     borderRadius: 24,
@@ -964,7 +953,6 @@ const styles = StyleSheet.create({
     shadowRadius: 4,
   },
 
-  // Fleet Status Card
   fleetStatusCard: {
     backgroundColor: '#FFF',
     borderRadius: 24,
@@ -1029,7 +1017,6 @@ const styles = StyleSheet.create({
     color: '#8A84A0',
   },
 
-  // Demand graph card
   demandCard: {
     backgroundColor: '#6C2BD9',
     borderRadius: 24,
@@ -1076,7 +1063,6 @@ const styles = StyleSheet.create({
     fontWeight: '600',
   },
 
-  // Priority orders list table
   priorityOrdersCard: {
     backgroundColor: '#FFF',
     borderRadius: 24,
@@ -1163,8 +1149,6 @@ const styles = StyleSheet.create({
   badgeDelayedText: {
     color: '#EF4444',
   },
-
-  // ─── SEARCH TAB STYLES ─────────────────────────────────────────────────────
 
   searchBar: {
     flexDirection: 'row',
@@ -1269,7 +1253,6 @@ const styles = StyleSheet.create({
     fontWeight: '600',
   },
 
-  // Result cards
   resultCard: {
     backgroundColor: '#FFF',
     borderRadius: 20,
@@ -1353,7 +1336,6 @@ const styles = StyleSheet.create({
     color: '#1A1135',
   },
 
-  // Search card progress timeline
   progressTimelineContainer: {
     borderTopWidth: 1,
     borderTopColor: '#F0ECF9',
@@ -1406,8 +1388,6 @@ const styles = StyleSheet.create({
     marginTop: 8,
     marginRight: 10,
   },
-
-  // ─── REPORTS/ANALYTICS TAB STYLES ──────────────────────────────────────────
 
   analyticsHeaderCard: {
     flexDirection: 'row',
@@ -1465,7 +1445,6 @@ const styles = StyleSheet.create({
     color: '#1A1135',
   },
 
-  // Analytics Stats Grid
   reportStatsGrid: {
     marginBottom: 20,
     gap: 10,
@@ -1509,7 +1488,6 @@ const styles = StyleSheet.create({
     color: '#1A1135',
   },
 
-  // Revenue Growth wave chart
   revenueCard: {
     backgroundColor: '#FFF',
     borderRadius: 24,
@@ -1590,7 +1568,6 @@ const styles = StyleSheet.create({
     color: '#8A84A0',
   },
 
-  // Efficiency section
   efficiencyCard: {
     backgroundColor: '#FFF',
     borderRadius: 24,
@@ -1654,7 +1631,6 @@ const styles = StyleSheet.create({
     color: '#1A1135',
   },
 
-  // Fleet distribution progress bars
   fleetDistributionCard: {
     backgroundColor: '#FFF',
     borderRadius: 24,
@@ -1698,7 +1674,6 @@ const styles = StyleSheet.create({
     borderRadius: 3,
   },
 
-  // Top Zones leaderboard
   topZonesCard: {
     backgroundColor: '#FFF',
     borderRadius: 24,
@@ -1764,7 +1739,6 @@ const styles = StyleSheet.create({
     color: '#658C00',
   },
 
-  // Settings Tab
   placeholder: {
     alignItems: 'center',
     gap: 12,
@@ -1825,7 +1799,6 @@ const styles = StyleSheet.create({
     color: Colors.error,
   },
 
-  // Bottom Tab Bar
   bottomTabBarContainer: {
     position: 'absolute',
     bottom: 0,

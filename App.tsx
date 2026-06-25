@@ -6,10 +6,10 @@ import RootNavigator from './navigation/RootNavigator';
 import { startTimeoutChecker } from './services/timeoutChecker';
 
 export default function App() {
-  // Start the global timeout checker when the app mounts
+  
   useEffect(() => {
     const stopChecker = startTimeoutChecker();
-    return stopChecker; // cleanup on unmount
+    return stopChecker; 
   }, []);
 
   return (

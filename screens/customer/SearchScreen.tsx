@@ -18,7 +18,6 @@ import type { NativeStackScreenProps } from '@react-navigation/native-stack';
 
 type Props = NativeStackScreenProps<RootStackParamList, 'CustomerSearch'>;
 
-// Popular searches shown as chips when the search field is empty
 const POPULAR_SEARCHES = ['Maggi Noodles', 'Amul Milk', 'Britannia Bread', 'Coca Cola'];
 
 export default function SearchScreen({ route, navigation }: Props) {
@@ -29,7 +28,6 @@ export default function SearchScreen({ route, navigation }: Props) {
   const [loading, setLoading] = useState(false);
   const [hasSearched, setHasSearched] = useState(false);
 
-  // Load all products on mount for instant search
   useEffect(() => {
     (async () => {
       try {
@@ -41,7 +39,6 @@ export default function SearchScreen({ route, navigation }: Props) {
     })();
   }, []);
 
-  // Debounced search
   useEffect(() => {
     if (!query.trim()) {
       setResults([]);
@@ -77,7 +74,6 @@ export default function SearchScreen({ route, navigation }: Props) {
     setQuery(term);
   };
 
-  // ─── Render ───────────────────────────────────────────────────────────────
   return (
     <SafeAreaView style={styles.safeArea}>
       <StatusBar barStyle="dark-content" backgroundColor={Colors.background} />
@@ -219,13 +215,10 @@ export default function SearchScreen({ route, navigation }: Props) {
   );
 }
 
-// Fallback icon component (since we can't guarantee MaterialCommunityIcons has the exact name)
 function MaterialCommunityIconsAlt({ name, size, color }: { name: string; size: number; color: string }) {
-  // Use Feather as a fallback
+  
   return <Feather name="truck" size={size} color={color} />;
 }
-
-// ─── Styles ─────────────────────────────────────────────────────────────────
 
 const styles = StyleSheet.create({
   safeArea: {
@@ -238,7 +231,6 @@ const styles = StyleSheet.create({
     paddingTop: 12,
   },
 
-  // Header
   header: {
     flexDirection: 'row',
     justifyContent: 'space-between',
@@ -267,7 +259,6 @@ const styles = StyleSheet.create({
     padding: 4,
   },
 
-  // Search bar
   searchBar: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -292,7 +283,6 @@ const styles = StyleSheet.create({
     paddingVertical: 0,
   },
 
-  // Popular searches
   popularSection: {
     marginBottom: 24,
   },
@@ -331,7 +321,6 @@ const styles = StyleSheet.create({
     fontWeight: '500',
   },
 
-  // Empty state
   emptyState: {
     alignItems: 'center',
     marginTop: 20,
@@ -380,7 +369,6 @@ const styles = StyleSheet.create({
     marginBottom: 24,
   },
 
-  // Feature cards
   featureRow: {
     flexDirection: 'row',
     gap: 12,
@@ -415,7 +403,6 @@ const styles = StyleSheet.create({
     lineHeight: 16,
   },
 
-  // Results
   resultsSection: {
     flex: 1,
   },
@@ -452,7 +439,6 @@ const styles = StyleSheet.create({
     marginTop: 2,
   },
 
-  // No results
   noResults: {
     alignItems: 'center',
     marginTop: 60,

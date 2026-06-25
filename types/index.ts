@@ -1,8 +1,6 @@
 import { Timestamp } from 'firebase/firestore';
 import { OrderStatus } from '../constants';
 
-// ─── Firestore Document Types ───────────────────────────────────────────────
-
 export interface Product {
   id: string;
   name: string;
@@ -48,8 +46,6 @@ export interface Order {
   pickupDeadline: Timestamp | null;
 }
 
-// ─── Navigation Param Types ─────────────────────────────────────────────────
-
 export type RootStackParamList = {
   Landing: undefined;
   CustomerTabs: { customerName: string };
@@ -69,8 +65,6 @@ export type RootStackParamList = {
   DeliveryDashboard: { partnerId: string; partnerName: string };
   AdminDashboard: undefined;
 };
-
-// ─── Enriched view types (not stored in Firestore, computed client-side) ────
 
 /** A RetailerStock entry enriched with the retailer's display name */
 export interface RetailerStockWithName extends RetailerStock {

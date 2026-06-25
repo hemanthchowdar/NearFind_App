@@ -1,10 +1,3 @@
-// ─── Timeout Checker ────────────────────────────────────────────────────────
-// Client-side polling that auto-cancels orders when retailers or delivery
-// partners don't respond within the configured deadline.
-//
-// Trade-off note: In production this would be a server-side Cloud Function
-// on a schedule. For the prototype, client-side polling is a deliberate,
-// documented tradeoff — it works as long as at least one client is open.
 
 import {
   collection,
@@ -96,7 +89,6 @@ export function startTimeoutChecker(): () => void {
     checkPickupTimeouts();
   }, TIMEOUT_CHECK_INTERVAL_MS);
 
-  // Run once immediately on start
   checkAcceptTimeouts();
   checkPickupTimeouts();
 

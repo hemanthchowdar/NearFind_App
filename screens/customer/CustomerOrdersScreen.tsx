@@ -26,7 +26,7 @@ export default function CustomerOrdersScreen({ customerName, navigation }: Props
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    // Subscribe to customer's live orders
+    
     const unsubscribe = subscribeToCustomerOrders(customerName, (data) => {
       setOrders(data);
       setLoading(false);

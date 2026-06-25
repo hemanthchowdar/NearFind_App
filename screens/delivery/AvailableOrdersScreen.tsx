@@ -46,22 +46,17 @@ interface DeliveryJob {
 export default function AvailableOrdersScreen({ route, navigation }: Props) {
   const { partnerId, partnerName } = route.params;
 
-  // Active Tab
   const [activeTab, setActiveTab] = useState<'Home' | 'Orders' | 'Profile'>('Home');
 
-  // Online / offline toggle
   const [isLookingForOrders, setIsLookingForOrders] = useState(true);
 
-  // Firestore live collections
   const [availableDbOrders, setAvailableDbOrders] = useState<Order[]>([]);
   const [myDbOrders, setMyDbOrders] = useState<Order[]>([]);
   const [loading, setLoading] = useState(true);
 
-  // Mock active delivery state (when driver claims a mock order)
   const [activeMockJob, setActiveMockJob] = useState<DeliveryJob | null>(null);
   const [mockJobState, setMockJobState] = useState<'arrived' | 'pickedup' | 'delivered'>('arrived');
 
-  // List of mock available orders matching Screenshot 2
   const [mockJobs, setMockJobs] = useState<DeliveryJob[]>([
     {
       id: 'ORD-8821',
@@ -100,13 +95,12 @@ export default function AvailableOrdersScreen({ route, navigation }: Props) {
   ]);
 
   useEffect(() => {
-    // Subscribe to available deliveries
+    
     const unsubAvailable = subscribeToAvailableDeliveries((data) => {
       setAvailableDbOrders(data);
       setLoading(false);
     });
 
-    // Subscribe to my claimed deliveries
     const unsubMy = subscribeToMyDeliveries(partnerId, (data) => {
       setMyDbOrders(data);
     });
@@ -117,12 +111,10 @@ export default function AvailableOrdersScreen({ route, navigation }: Props) {
     };
   }, [partnerId]);
 
-  // Identify any active in-progress Firestore deliveries claimed by this driver
   const activeDbDelivery = myDbOrders.find(
     (o) => o.status === OrderStatus.ReadyForPickup || o.status === OrderStatus.PickedUp
   );
 
-  // Action handlers
   const handleAcceptJob = async (job: DeliveryJob) => {
     if (job.isMock) {
       setActiveMockJob(job);
@@ -142,15 +134,14 @@ export default function AvailableOrdersScreen({ route, navigation }: Props) {
     setMockJobs((prev) => prev.filter((j) => j.id !== jobId));
   };
 
-  // Firestore Delivery State Machine
   const handleNextStepDb = async (order: Order) => {
     try {
       if (order.status === OrderStatus.ReadyForPickup) {
-        // Driver picks up order from store
+        
         await markPickedUp(order.id);
         Alert.alert('Order Picked Up', 'You have collected the parcel. Proceed to customer location.');
       } else if (order.status === OrderStatus.PickedUp) {
-        // Driver delivers order to customer
+        
         await markDelivered(order.id);
         Alert.alert('Delivered!', 'Order marked as successfully delivered.');
       }
@@ -159,7 +150,6 @@ export default function AvailableOrdersScreen({ route, navigation }: Props) {
     }
   };
 
-  // Mock Delivery State Machine
   const handleNextStepMock = () => {
     if (mockJobState === 'arrived') {
       setMockJobState('pickedup');
@@ -170,7 +160,7 @@ export default function AvailableOrdersScreen({ route, navigation }: Props) {
         {
           text: 'OK',
           onPress: () => {
-            // Remove mock job from active state
+            
             setActiveMockJob(null);
           },
         },
@@ -187,9 +177,6 @@ export default function AvailableOrdersScreen({ route, navigation }: Props) {
     );
   };
 
-  // ─── RENDERS ───────────────────────────────────────────────────────────────
-
-  // Tab 1: Delivery Home Tab (Screenshot 1 Layout)
   const renderHomeTab = () => {
     const totalEarnings = 1240.50;
     const completedCount = 14 + myDbOrders.filter((o) => o.status === OrderStatus.Delivered).length;
@@ -322,17 +309,14 @@ export default function AvailableOrdersScreen({ route, navigation }: Props) {
     );
   };
 
-  // Tab 2: Orders Tab (Screenshot 2 and Screenshot 3 depending on state)
   const renderOrdersTab = () => {
     const activeJob = activeDbDelivery || activeMockJob;
 
-    // A. ACTIVE DELIVERY ROUTE VIEW (Screenshot 3 Layout)
     if (activeJob) {
       const isDb = !('isMock' in activeJob);
       const isReadyToPickup = isDb ? activeJob.status === OrderStatus.ReadyForPickup : mockJobState === 'arrived';
       const isPickedUp = isDb ? activeJob.status === OrderStatus.PickedUp : mockJobState === 'pickedup';
 
-      // Setup labels based on status
       const storeName = isDb ? activeJob.retailerName : activeJob.storeName;
       const pickupAddress = isDb ? 'MG Road, Central Sector, Blr 560001' : activeJob.pickupAddress;
       const orderIdLabel = isDb ? `#NF-${activeJob.id.slice(-5).toUpperCase()}` : `#${activeJob.id}`;
@@ -344,7 +328,7 @@ export default function AvailableOrdersScreen({ route, navigation }: Props) {
       if (isPickedUp) {
         actionBtnText = 'Confirm Delivery >';
       } else if (!isReadyToPickup && !isPickedUp) {
-        // Fallback or in-between state
+        
         actionBtnText = 'Confirm Pickup >';
       }
 
@@ -476,8 +460,6 @@ export default function AvailableOrdersScreen({ route, navigation }: Props) {
       );
     }
 
-    // B. AVAILABLE JOBS LIST VIEW (Screenshot 2 Layout)
-    // Combine Firestore ReadyForPickup orders + Mock orders
     const combinedJobs: DeliveryJob[] = [
       ...availableDbOrders.map((ord) => ({
         id: ord.id,
@@ -587,7 +569,6 @@ export default function AvailableOrdersScreen({ route, navigation }: Props) {
     );
   };
 
-  // Tab 3: Delivery Profile Tab
   const renderProfileTab = () => {
     return (
       <View style={styles.centerContainer}>
@@ -777,7 +758,6 @@ const styles = StyleSheet.create({
     zIndex: 1,
   },
 
-  // Switch looking toggle
   storeStatusCard: {
     flexDirection: 'row',
     justifyContent: 'space-between',
@@ -821,7 +801,6 @@ const styles = StyleSheet.create({
     marginTop: 2,
   },
 
-  // Today's Earnings purple banner
   salesBannerCard: {
     flexDirection: 'row',
     justifyContent: 'space-between',
@@ -866,7 +845,6 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
 
-  // Capacities half width stats
   twoColRow: {
     flexDirection: 'row',
     gap: 12,
@@ -893,7 +871,6 @@ const styles = StyleSheet.create({
     color: Colors.primary,
   },
 
-  // Map Preview Banner
   mapPreviewBanner: {
     height: 180,
     borderRadius: 24,
@@ -944,7 +921,6 @@ const styles = StyleSheet.create({
     color: '#1A1135',
   },
 
-  // Performance graph card
   performanceCard: {
     backgroundColor: '#FFF',
     borderRadius: 24,
@@ -1026,7 +1002,6 @@ const styles = StyleSheet.create({
     marginTop: 8,
   },
 
-  // Session stats
   sessionCard: {
     flexDirection: 'row',
     justifyContent: 'space-between',
@@ -1059,8 +1034,6 @@ const styles = StyleSheet.create({
     fontWeight: '800',
     color: '#1A1135',
   },
-
-  // ─── AVAILABLE ORDERS TAB (Screenshot 2) ────────────────────────────────────
 
   statusOnlinePayoutCard: {
     flexDirection: 'row',
@@ -1130,7 +1103,6 @@ const styles = StyleSheet.create({
     color: '#1a1135',
   },
 
-  // Job Cards list
   jobCard: {
     backgroundColor: '#FFF',
     borderRadius: 24,
@@ -1257,8 +1229,6 @@ const styles = StyleSheet.create({
     fontWeight: '800',
     color: '#FFF',
   },
-
-  // ─── ACTIVE PICKUP ROUTE STYLES (Screenshot 3) ─────────────────────────────
 
   routeHeader: {
     flexDirection: 'row',
@@ -1555,7 +1525,6 @@ const styles = StyleSheet.create({
     fontWeight: '800',
   },
 
-  // General tab placeholders
   placeholderTitle: {
     fontSize: 18,
     fontWeight: '800',
@@ -1599,7 +1568,6 @@ const styles = StyleSheet.create({
     color: Colors.error,
   },
 
-  // Bottom Tab Bar
   bottomTabBarContainer: {
     position: 'absolute',
     bottom: 0,

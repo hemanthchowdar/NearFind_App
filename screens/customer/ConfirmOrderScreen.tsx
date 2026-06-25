@@ -26,7 +26,7 @@ export default function ConfirmOrderScreen({ route, navigation }: Props) {
   const [placing, setPlacing] = useState(false);
 
   const itemTotal = price * qty;
-  const deliveryFee = 0; // Free delivery for prototype
+  const deliveryFee = 0; 
   const grandTotal = itemTotal + deliveryFee;
 
   const handleDecrement = () => {
@@ -49,7 +49,7 @@ export default function ConfirmOrderScreen({ route, navigation }: Props) {
         price,
         customerName,
       });
-      // Navigate to order status tracking
+      
       navigation.replace('OrderStatus', { customerName, orderId });
     } catch (error: any) {
       Alert.alert(
@@ -206,8 +206,6 @@ export default function ConfirmOrderScreen({ route, navigation }: Props) {
   );
 }
 
-// ─── Styles ─────────────────────────────────────────────────────────────────
-
 const styles = StyleSheet.create({
   safeArea: {
     flex: 1,
@@ -220,7 +218,6 @@ const styles = StyleSheet.create({
     paddingHorizontal: 20,
   },
 
-  // Header
   header: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -241,7 +238,6 @@ const styles = StyleSheet.create({
     padding: 4,
   },
 
-  // Ordering From
   orderingFromCard: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -272,7 +268,6 @@ const styles = StyleSheet.create({
     color: Colors.textPrimary,
   },
 
-  // Product card
   productCard: {
     flexDirection: 'row',
     backgroundColor: Colors.white,
@@ -335,7 +330,6 @@ const styles = StyleSheet.create({
     color: Colors.primary,
   },
 
-  // Quantity
   qtySection: {
     flexDirection: 'row',
     justifyContent: 'space-between',
@@ -377,7 +371,6 @@ const styles = StyleSheet.create({
     textAlign: 'center',
   },
 
-  // Info row
   infoRow: {
     flexDirection: 'row',
     gap: 12,
@@ -410,7 +403,6 @@ const styles = StyleSheet.create({
     letterSpacing: 0.5,
   },
 
-  // Price breakdown
   priceBreakdown: {
     backgroundColor: Colors.white,
     borderRadius: 14,
@@ -451,7 +443,6 @@ const styles = StyleSheet.create({
     fontVariant: ['tabular-nums'],
   },
 
-  // Payment
   paymentRow: {
     flexDirection: 'row',
     justifyContent: 'space-between',
@@ -488,7 +479,6 @@ const styles = StyleSheet.create({
     textDecorationLine: 'underline',
   },
 
-  // Bottom bar
   bottomBar: {
     position: 'absolute',
     bottom: 0,

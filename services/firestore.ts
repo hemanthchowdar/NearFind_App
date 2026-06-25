@@ -1,5 +1,3 @@
-// ─── Firestore Service Layer ────────────────────────────────────────────────
-// All Firestore reads/writes go through here — screens never import firestore directly.
 
 import {
   collection,
@@ -31,15 +29,11 @@ import type {
   StatusHistoryEntry,
 } from '../types';
 
-// ─── Collection references ──────────────────────────────────────────────────
-
 const productsCol = collection(db, 'products');
 const retailersCol = collection(db, 'retailers');
 const retailerStockCol = collection(db, 'retailerStock');
 const deliveryPartnersCol = collection(db, 'deliveryPartners');
 const ordersCol = collection(db, 'orders');
-
-// ─── Products ───────────────────────────────────────────────────────────────
 
 /** Search products by name (case-insensitive substring match, done client-side) */
 export async function searchProducts(searchTerm: string): Promise<Product[]> {
@@ -56,21 +50,15 @@ export async function getAllProducts(): Promise<Product[]> {
   return snapshot.docs.map((d) => ({ id: d.id, ...d.data() } as Product));
 }
 
-// ─── Retailers ──────────────────────────────────────────────────────────────
-
 export async function getAllRetailers(): Promise<Retailer[]> {
   const snapshot = await getDocs(retailersCol);
   return snapshot.docs.map((d) => ({ id: d.id, ...d.data() } as Retailer));
 }
 
-// ─── Delivery Partners ─────────────────────────────────────────────────────
-
 export async function getAllDeliveryPartners(): Promise<DeliveryPartner[]> {
   const snapshot = await getDocs(deliveryPartnersCol);
   return snapshot.docs.map((d) => ({ id: d.id, ...d.data() } as DeliveryPartner));
 }
-
-// ─── Retailer Stock ─────────────────────────────────────────────────────────
 
 /** Get all retailers carrying a specific product, enriched with retailer name */
 export async function getStockForProduct(productId: string): Promise<RetailerStockWithName[]> {
@@ -80,7 +68,6 @@ export async function getStockForProduct(productId: string): Promise<RetailerSto
     (d) => ({ id: d.id, ...d.data() } as RetailerStock)
   );
 
-  // Fetch retailer names
   const retailers = await getAllRetailers();
   const retailerMap = new Map(retailers.map((r) => [r.id, r.name]));
 
@@ -98,7 +85,7 @@ export function subscribeToRetailerStock(
   const q = query(retailerStockCol, where('retailerId', '==', retailerId));
   return onSnapshot(q, async (snap) => {
     const stocks: RetailerStock[] = snap.docs.map((d) => ({ id: d.id, ...d.data() } as RetailerStock));
-    // Fetch products to map names
+    
     const products = await getAllProducts();
     const productMap = new Map(products.map((p) => [p.id, p.name]));
     
@@ -123,9 +110,9 @@ export async function addRetailerProduct(
   price: number,
   stock: number
 ): Promise<void> {
-  // First, add the product to products collection
+  
   const prodRef = await addDoc(productsCol, { name: productName });
-  // Second, add to retailerStock
+  
   await addDoc(retailerStockCol, {
     retailerId,
     productId: prodRef.id,
@@ -133,8 +120,6 @@ export async function addRetailerProduct(
     stock,
   });
 }
-
-// ─── Orders ─────────────────────────────────────────────────────────────────
 
 /**
  * Place a new order. Uses a transaction to atomically decrement stock.
@@ -152,7 +137,6 @@ export async function createOrder(params: {
   const { productId, retailerId, qty } = params;
   const now = Timestamp.now();
 
-  // Find the retailerStock doc for this product + retailer
   const stockQuery = query(
     retailerStockCol,
     where('productId', '==', productId),
@@ -162,17 +146,14 @@ export async function createOrder(params: {
   if (stockSnap.empty) throw new Error('Stock entry not found');
   const stockDoc = stockSnap.docs[0];
 
-  // Transaction: check stock ≥ qty, decrement, then create order
   const orderId = await runTransaction(db, async (txn) => {
     const stockData = (await txn.get(stockDoc.ref)).data() as RetailerStock;
     if (stockData.stock < qty) {
       throw new Error('Not enough stock available');
     }
 
-    // Decrement stock
     txn.update(stockDoc.ref, { stock: increment(-qty) });
 
-    // Create order (we can't use addDoc inside a transaction, so use doc() for a new ref)
     const orderRef = doc(ordersCol);
     const acceptDeadline = Timestamp.fromMillis(now.toMillis() + ACCEPT_TIMEOUT_MS);
 
@@ -240,7 +221,7 @@ export function subscribeToCustomerOrders(
   const q = query(ordersCol, where('customerName', '==', customerName));
   return onSnapshot(q, (snap) => {
     const orders = snap.docs.map((d) => ({ id: d.id, ...d.data() } as Order));
-    // Sort most recent first
+    
     orders.sort((a, b) => {
       const aTime = a.createdAt?.toMillis ? a.createdAt.toMillis() : new Date(a.createdAt as any).getTime();
       const bTime = b.createdAt?.toMillis ? b.createdAt.toMillis() : new Date(b.createdAt as any).getTime();
@@ -289,13 +270,11 @@ export function subscribeToAllOrders(
 ): () => void {
   return onSnapshot(ordersCol, (snap) => {
     const orders = snap.docs.map((d) => ({ id: d.id, ...d.data() } as Order));
-    // Sort most recent first
+    
     orders.sort((a, b) => b.createdAt.toMillis() - a.createdAt.toMillis());
     callback(orders);
   });
 }
-
-// ─── Order Status Updates ───────────────────────────────────────────────────
 
 /** Generic helper to transition an order to a new status */
 async function transitionOrder(
@@ -319,13 +298,12 @@ export async function acceptOrder(orderId: string): Promise<void> {
 
 /** Retailer rejects an order — also restocks the product */
 export async function rejectOrder(orderId: string): Promise<void> {
-  // Get the order to find product + retailer + qty
+  
   const orderRef = doc(ordersCol, orderId);
   const orderSnap = await getDoc(orderRef);
   if (!orderSnap.exists()) throw new Error('Order not found');
   const order = orderSnap.data() as Order;
 
-  // Restock
   const stockQuery = query(
     retailerStockCol,
     where('productId', '==', order.productId),
@@ -381,8 +359,6 @@ export async function markDelivered(orderId: string): Promise<void> {
   await transitionOrder(orderId, OrderStatus.Delivered);
 }
 
-// ─── Seed Database ──────────────────────────────────────────────────────────
-
 import {
   SEED_RETAILERS,
   SEED_PRODUCTS,
@@ -393,7 +369,6 @@ import {
 export async function seedDatabase(): Promise<void> {
   const batch = writeBatch(db);
 
-  // Clear existing collections
   const collections = [productsCol, retailersCol, retailerStockCol, deliveryPartnersCol, ordersCol];
   for (const col of collections) {
     const snap = await getDocs(col);
@@ -401,58 +376,47 @@ export async function seedDatabase(): Promise<void> {
   }
   await batch.commit();
 
-  // Seed products
   const productIds: string[] = [];
   for (const p of SEED_PRODUCTS) {
     const ref = await addDoc(productsCol, { name: p.name });
     productIds.push(ref.id);
   }
 
-  // Seed retailers
   const retailerIds: string[] = [];
   for (const r of SEED_RETAILERS) {
     const ref = await addDoc(retailersCol, { name: r.name });
     retailerIds.push(ref.id);
   }
 
-  // Seed delivery partners
   for (const dp of SEED_DELIVERY_PARTNERS) {
     await addDoc(deliveryPartnersCol, { name: dp.name });
   }
 
-  // Seed retailerStock — each product carried by 2–3 retailers at different prices
   const stockEntries: Array<Omit<RetailerStock, 'id'>> = [
-    // Maggi Noodles: Sharma (₹14, stock 2), Quick Mart (₹15, stock 0 — out of stock demo)
+    
     { retailerId: retailerIds[0], productId: productIds[0], price: 14, stock: 2 },
     { retailerId: retailerIds[1], productId: productIds[0], price: 15, stock: 0 },
     { retailerId: retailerIds[2], productId: productIds[0], price: 13, stock: 5 },
 
-    // Amul Milk 500ml
     { retailerId: retailerIds[0], productId: productIds[1], price: 28, stock: 10 },
     { retailerId: retailerIds[1], productId: productIds[1], price: 30, stock: 8 },
 
-    // Britannia Bread
     { retailerId: retailerIds[0], productId: productIds[2], price: 45, stock: 3 },
     { retailerId: retailerIds[2], productId: productIds[2], price: 42, stock: 6 },
 
-    // Tata Salt 1kg
     { retailerId: retailerIds[1], productId: productIds[3], price: 25, stock: 15 },
     { retailerId: retailerIds[2], productId: productIds[3], price: 24, stock: 12 },
 
-    // Parle-G Biscuits
     { retailerId: retailerIds[0], productId: productIds[4], price: 10, stock: 20 },
     { retailerId: retailerIds[1], productId: productIds[4], price: 10, stock: 18 },
     { retailerId: retailerIds[2], productId: productIds[4], price: 10, stock: 25 },
 
-    // Colgate Toothpaste
     { retailerId: retailerIds[0], productId: productIds[5], price: 55, stock: 7 },
     { retailerId: retailerIds[1], productId: productIds[5], price: 58, stock: 4 },
 
-    // Surf Excel 1kg
     { retailerId: retailerIds[1], productId: productIds[6], price: 120, stock: 3 },
     { retailerId: retailerIds[2], productId: productIds[6], price: 115, stock: 5 },
 
-    // Aashirvaad Atta 5kg
     { retailerId: retailerIds[0], productId: productIds[7], price: 280, stock: 4 },
     { retailerId: retailerIds[2], productId: productIds[7], price: 275, stock: 6 },
   ];

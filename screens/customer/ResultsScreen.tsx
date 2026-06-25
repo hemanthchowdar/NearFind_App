@@ -17,7 +17,6 @@ import type { NativeStackScreenProps } from '@react-navigation/native-stack';
 
 type Props = NativeStackScreenProps<RootStackParamList, 'CustomerResults'>;
 
-// Mock distances/ETA for demo — in production these come from a geolocation service
 const MOCK_DISTANCES = ['0.8 km', '1.4 km', '2.1 km', '0.5 km', '3.2 km'];
 const MOCK_ETAS = ['12 MINS', '20 MINS', '25 MINS', '8 MINS', '30 MINS'];
 
@@ -30,7 +29,7 @@ export default function ResultsScreen({ route, navigation }: Props) {
     (async () => {
       try {
         const data = await getStockForProduct(productId);
-        // Sort: in-stock first, then by price ascending
+        
         data.sort((a, b) => {
           if (a.stock === 0 && b.stock > 0) return 1;
           if (a.stock > 0 && b.stock === 0) return -1;
@@ -58,7 +57,6 @@ export default function ResultsScreen({ route, navigation }: Props) {
     });
   };
 
-  // Find the cheapest in-stock retailer for the "Neighborhood Favorite" banner
   const favoriteRetailer = stocks.find((s) => s.stock > 0);
 
   return (
@@ -233,8 +231,6 @@ export default function ResultsScreen({ route, navigation }: Props) {
   );
 }
 
-// ─── Styles ─────────────────────────────────────────────────────────────────
-
 const styles = StyleSheet.create({
   safeArea: {
     flex: 1,
@@ -247,7 +243,6 @@ const styles = StyleSheet.create({
     paddingHorizontal: 20,
   },
 
-  // Header
   header: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -282,7 +277,6 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
 
-  // Section header
   sectionHeader: {
     flexDirection: 'row',
     justifyContent: 'space-between',
@@ -317,7 +311,6 @@ const styles = StyleSheet.create({
     letterSpacing: 0.5,
   },
 
-  // Retailer cards
   retailerCard: {
     backgroundColor: Colors.white,
     borderRadius: 16,
@@ -421,7 +414,6 @@ const styles = StyleSheet.create({
     letterSpacing: 0.5,
   },
 
-  // Bottom row
   retailerCardBottom: {
     flexDirection: 'row',
     justifyContent: 'space-between',
@@ -466,7 +458,6 @@ const styles = StyleSheet.create({
     lineHeight: 16,
   },
 
-  // Favorite banner
   favoriteBanner: {
     backgroundColor: Colors.primary,
     borderRadius: 16,
@@ -513,7 +504,6 @@ const styles = StyleSheet.create({
     letterSpacing: 0.5,
   },
 
-  // Empty
   emptyState: {
     alignItems: 'center',
     marginTop: 60,

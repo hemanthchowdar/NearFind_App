@@ -5,7 +5,6 @@ import { Ionicons } from '@expo/vector-icons';
 import { Colors } from '../constants';
 import type { RootStackParamList } from '../types';
 
-// Screens
 import LandingScreen from '../screens/LandingScreen';
 import CustomerHomeScreen from '../screens/customer/CustomerHomeScreen';
 import SearchScreen from '../screens/customer/SearchScreen';
@@ -20,8 +19,6 @@ import AdminScreen from '../screens/admin/AdminScreen';
 
 const Stack = createNativeStackNavigator<RootStackParamList>();
 const Tab = createBottomTabNavigator();
-
-// ─── Customer Bottom Tabs ───────────────────────────────────────────────────
 
 function CustomerTabNavigator({ route }: any) {
   const { customerName } = route.params;
@@ -104,8 +101,6 @@ function CustomerTabNavigator({ route }: any) {
     </Tab.Navigator>
   );
 }
-
-// ─── Root Stack Navigator ───────────────────────────────────────────────────
 
 export default function RootNavigator() {
   return (

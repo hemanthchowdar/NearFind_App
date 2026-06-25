@@ -49,34 +49,26 @@ interface ActionOrder {
 export default function IncomingOrdersScreen({ route, navigation }: Props) {
   const { retailerId, retailerName } = route.params;
 
-  // Local state for active tab
   const [activeTab, setActiveTab] = useState<'Home' | 'Orders' | 'Search' | 'Profile'>('Home');
 
-  // Firestore orders
   const [orders, setOrders] = useState<Order[]>([]);
   const [loading, setLoading] = useState(true);
 
-  // Firestore stock
   const [stockItems, setStockItems] = useState<(RetailerStock & { productName: string })[]>([]);
 
-  // Local state for store status
   const [isStoreOpen, setIsStoreOpen] = useState(true);
 
-  // Time ticker for request countdowns
   const [now, setNow] = useState(Date.now());
 
-  // Search tab states
   const [searchQuery, setSearchQuery] = useState('');
   const [stockFilter, setStockFilter] = useState<'All' | 'Low' | 'Out'>('All');
 
-  // Add Product Modal states
   const [addModalVisible, setAddModalVisible] = useState(false);
   const [newProductName, setNewProductName] = useState('');
   const [newProductPrice, setNewProductPrice] = useState('');
   const [newProductStock, setNewProductStock] = useState('');
   const [addingProduct, setAddingProduct] = useState(false);
 
-  // Mock list of orders for Home screen matching Screenshot 1
   const [mockActionOrders, setMockActionOrders] = useState<ActionOrder[]>([
     {
       id: 'ORD-8821',
@@ -98,7 +90,6 @@ export default function IncomingOrdersScreen({ route, navigation }: Props) {
     },
   ]);
 
-  // Mock products for Search/Inventory page matching Screenshot 2
   const [mockProducts, setMockProducts] = useState([
     {
       id: 'stock-mock-1',
@@ -147,13 +138,12 @@ export default function IncomingOrdersScreen({ route, navigation }: Props) {
   ]);
 
   useEffect(() => {
-    // Subscribe to live orders for this store
+    
     const unsubscribeOrders = subscribeToRetailerOrders(retailerId, (data) => {
       setOrders(data);
       setLoading(false);
     });
 
-    // Subscribe to stock items for this store
     const unsubscribeStock = subscribeToRetailerStock(retailerId, (data) => {
       setStockItems(data);
     });
@@ -169,15 +159,25 @@ export default function IncomingOrdersScreen({ route, navigation }: Props) {
     };
   }, [retailerId]);
 
-  // Filter orders by status
   const placedRequests = orders.filter((o) => o.status === OrderStatus.Placed);
-  const activeOrders = orders.filter((o) => o.status === OrderStatus.Accepted || o.status === OrderStatus.Packed);
+  const activeOrders = orders.filter(
+    (o) =>
+      o.status === OrderStatus.Accepted ||
+      o.status === OrderStatus.Packed ||
+      o.status === OrderStatus.ReadyForPickup
+  );
+  const historyOrders = orders.filter(
+    (o) =>
+      o.status === OrderStatus.PickedUp ||
+      o.status === OrderStatus.Delivered ||
+      o.status === OrderStatus.Rejected
+  );
   const completedOrdersCount = orders.filter((o) => o.status === OrderStatus.Delivered).length;
 
   const acceptedCount = orders.filter((o) => o.status === OrderStatus.Accepted).length;
   const packedCount = orders.filter((o) => o.status === OrderStatus.Packed).length;
+  const readyCount = orders.filter((o) => o.status === OrderStatus.ReadyForPickup).length;
 
-  // Action handlers
   const handleAccept = async (orderId: string) => {
     try {
       await acceptOrder(orderId);
@@ -210,7 +210,6 @@ export default function IncomingOrdersScreen({ route, navigation }: Props) {
     }
   };
 
-  // Switch handlers for inventory Mock items
   const handleToggleMockProduct = (id: string, currentVal: boolean) => {
     setMockProducts((prev) =>
       prev.map((item) => {
@@ -228,7 +227,6 @@ export default function IncomingOrdersScreen({ route, navigation }: Props) {
     );
   };
 
-  // Switch handlers for Firestore database stock items
   const handleToggleDbProduct = async (stockId: string, currentStock: number) => {
     try {
       const newStock = currentStock > 0 ? 0 : 10;
@@ -238,7 +236,6 @@ export default function IncomingOrdersScreen({ route, navigation }: Props) {
     }
   };
 
-  // Accept/Decline handler for Mock orders on Home tab
   const handleActionOnMockOrder = (orderId: string, accepted: boolean) => {
     Alert.alert(
       accepted ? 'Order Accepted' : 'Order Declined',
@@ -247,7 +244,6 @@ export default function IncomingOrdersScreen({ route, navigation }: Props) {
     setMockActionOrders((prev) => prev.filter((o) => o.id !== orderId));
   };
 
-  // Add new product handler
   const handleAddProductSubmit = async () => {
     if (!newProductName.trim()) {
       Alert.alert('Validation Error', 'Please enter a product name.');
@@ -288,9 +284,8 @@ export default function IncomingOrdersScreen({ route, navigation }: Props) {
     );
   };
 
-  // Filter products for Search Tab
   const getFilteredProducts = () => {
-    // Combine mock items and actual Firestore stock items
+    
     const allItems = [
       ...mockProducts,
       ...stockItems.map((item) => ({
@@ -306,13 +301,11 @@ export default function IncomingOrdersScreen({ route, navigation }: Props) {
       })),
     ];
 
-    // Filter by search query
     let filtered = allItems.filter((item) =>
       item.productName.toLowerCase().includes(searchQuery.toLowerCase()) ||
       item.sku.toLowerCase().includes(searchQuery.toLowerCase())
     );
 
-    // Filter by stock pill status
     if (stockFilter === 'Low') {
       filtered = filtered.filter((item) => item.stock > 0 && item.stock <= 5);
     } else if (stockFilter === 'Out') {
@@ -322,11 +315,8 @@ export default function IncomingOrdersScreen({ route, navigation }: Props) {
     return filtered;
   };
 
-  // ─── TAB RENDERS ───────────────────────────────────────────────────────────
-
-  // Tab 1: Premium Retailer Home Page (Screenshot 1 Layout)
   const renderNewRequestsTab = () => {
-    // Combine live Firestore Placed orders and active Mock orders
+    
     const allPendingActions: ActionOrder[] = [
       ...placedRequests.map((req) => ({
         id: req.id,
@@ -340,7 +330,6 @@ export default function IncomingOrdersScreen({ route, navigation }: Props) {
       ...mockActionOrders,
     ];
 
-    // Daily completed count (mock 24 completed + live database completed)
     const completedOrders = 24 + completedOrdersCount;
     const progressPercent = Math.min(1, completedOrders / 30);
 
@@ -533,7 +522,6 @@ export default function IncomingOrdersScreen({ route, navigation }: Props) {
     );
   };
 
-  // Tab 2: Live queue and orders tracking tab
   const renderOrdersTab = () => {
     return (
       <ScrollView style={styles.container} contentContainerStyle={styles.contentContainer} showsVerticalScrollIndicator={false}>
@@ -541,8 +529,8 @@ export default function IncomingOrdersScreen({ route, navigation }: Props) {
         <View style={styles.statsRow}>
           <View style={[styles.statBox, { backgroundColor: Colors.primary }]}>
             <View style={styles.statBoxTop}>
-              <Ionicons name="clipboard-outline" size={20} color={Colors.white} />
-              <Text style={styles.statBoxLabel}>ACCEPTED</Text>
+              <Ionicons name="clipboard-outline" size={15} color={Colors.white} />
+              <Text numberOfLines={1} adjustsFontSizeToFit style={styles.statBoxLabel}>ACCEPTED</Text>
             </View>
             <Text style={styles.statBoxNumber}>
               {acceptedCount < 10 ? `0${acceptedCount}` : acceptedCount}
@@ -551,11 +539,21 @@ export default function IncomingOrdersScreen({ route, navigation }: Props) {
 
           <View style={[styles.statBox, { backgroundColor: Colors.accent }]}>
             <View style={styles.statBoxTop}>
-              <Ionicons name="cube-outline" size={20} color={Colors.textPrimary} />
-              <Text style={[styles.statBoxLabel, { color: Colors.textPrimary }]}>PACKED</Text>
+              <Ionicons name="cube-outline" size={15} color={Colors.textPrimary} />
+              <Text numberOfLines={1} adjustsFontSizeToFit style={[styles.statBoxLabel, { color: Colors.textPrimary }]}>PACKED</Text>
             </View>
             <Text style={[styles.statBoxNumber, { color: Colors.textPrimary }]}>
               {packedCount < 10 ? `0${packedCount}` : packedCount}
+            </Text>
+          </View>
+
+          <View style={[styles.statBox, { backgroundColor: '#3B82F6' }]}>
+            <View style={styles.statBoxTop}>
+              <Ionicons name="flash-outline" size={15} color={Colors.white} />
+              <Text numberOfLines={1} adjustsFontSizeToFit style={styles.statBoxLabel}>READY</Text>
+            </View>
+            <Text style={styles.statBoxNumber}>
+              {readyCount < 10 ? `0${readyCount}` : readyCount}
             </Text>
           </View>
         </View>
@@ -563,6 +561,7 @@ export default function IncomingOrdersScreen({ route, navigation }: Props) {
         {/* Active Queue Cards */}
         {activeOrders.map((ord) => {
           const isAccepted = ord.status === OrderStatus.Accepted;
+          const isPacked = ord.status === OrderStatus.Packed;
 
           return (
             <View key={ord.id} style={styles.card}>
@@ -571,13 +570,13 @@ export default function IncomingOrdersScreen({ route, navigation }: Props) {
                 <View
                   style={[
                     styles.statusPill,
-                    isAccepted ? styles.statusPillPurple : styles.statusPillGreen,
+                    isAccepted ? styles.statusPillPurple : (isPacked ? styles.statusPillGreen : styles.statusPillBlue),
                   ]}
                 >
                   <Text
                     style={[
                       styles.statusPillText,
-                      isAccepted ? styles.statusPillTextPurple : styles.statusPillTextGreen,
+                      isAccepted ? styles.statusPillTextPurple : (isPacked ? styles.statusPillTextGreen : styles.statusPillTextBlue),
                     ]}
                   >
                     {ord.status.toUpperCase()}
@@ -601,13 +600,20 @@ export default function IncomingOrdersScreen({ route, navigation }: Props) {
                   <Ionicons name="time-outline" size={16} color={Colors.textSecondary} />
                   <Text style={styles.activeDetailsText}>ETA: 14 mins</Text>
                 </View>
-              ) : (
+              ) : isPacked ? (
                 <View style={styles.activeDetailsRow}>
                   <Ionicons name="car-outline" size={16} color={Colors.textSecondary} />
                   <Text style={styles.activeDetailsText}>
                     {ord.deliveryPartnerId
                       ? 'Driver Assigned: David K.'
                       : 'Searching for driver...'}
+                  </Text>
+                </View>
+              ) : (
+                <View style={styles.waitingDriverContainer}>
+                  <Ionicons name="hourglass-outline" size={16} color="#1E40AF" />
+                  <Text style={styles.waitingDriverText}>
+                    READY FOR DELIVERY AGENT TO PICKUP
                   </Text>
                 </View>
               )}
@@ -621,7 +627,7 @@ export default function IncomingOrdersScreen({ route, navigation }: Props) {
                   <Ionicons name="cube-outline" size={18} color={Colors.white} />
                   <Text style={styles.markPackedBtnText}>MARK PACKED</Text>
                 </TouchableOpacity>
-              ) : (
+              ) : isPacked ? (
                 <TouchableOpacity
                   style={styles.markReadyBtn}
                   onPress={() => handleMarkReady(ord.id)}
@@ -629,7 +635,7 @@ export default function IncomingOrdersScreen({ route, navigation }: Props) {
                   <Ionicons name="checkmark-circle-outline" size={18} color={Colors.textPrimary} />
                   <Text style={styles.markReadyBtnText}>MARK READY FOR PICKUP</Text>
                 </TouchableOpacity>
-              )}
+              ) : null}
             </View>
           );
         })}
@@ -643,16 +649,57 @@ export default function IncomingOrdersScreen({ route, navigation }: Props) {
             </Text>
           </View>
         )}
+
+        {/* Order History Section */}
+        {historyOrders.length > 0 && (
+          <View style={styles.historySection}>
+            <Text style={styles.historySectionTitle}>Order History</Text>
+            {historyOrders.map((ord) => {
+              const isDelivered = ord.status === OrderStatus.Delivered;
+              const isPickedUp = ord.status === OrderStatus.PickedUp;
+
+              return (
+                <View key={ord.id} style={[styles.card, styles.historyCard]}>
+                  <View style={styles.cardTopBar}>
+                    <Text style={styles.orderIdLabel}>#NF-{ord.id.slice(-5).toUpperCase()}</Text>
+                    <View
+                      style={[
+                        styles.statusPill,
+                        isDelivered ? styles.statusPillGreen : (isPickedUp ? styles.statusPillPurple : styles.statusPillGray),
+                      ]}
+                    >
+                      <Text
+                        style={[
+                          styles.statusPillText,
+                          isDelivered ? styles.statusPillTextGreen : (isPickedUp ? styles.statusPillTextPurple : styles.statusPillTextGray),
+                        ]}
+                      >
+                        {ord.status.toUpperCase()}
+                      </Text>
+                    </View>
+                  </View>
+
+                  <Text style={styles.activeCustomerName}>{ord.customerName}</Text>
+                  
+                  <View style={styles.activeDetailsRow}>
+                    <Ionicons name="briefcase-outline" size={16} color={Colors.textMuted} />
+                    <Text style={styles.historyDetailsText} numberOfLines={1}>
+                      {ord.qty} item{ord.qty > 1 ? 's' : ''} • {ord.productName}
+                    </Text>
+                  </View>
+                </View>
+              );
+            })}
+          </View>
+        )}
         <View style={{ height: 100 }} />
       </ScrollView>
     );
   };
 
-  // Tab 3: Premium Retailer Search/Inventory Page (Screenshot 2 Layout)
   const renderSearchTab = () => {
     const listData = getFilteredProducts();
 
-    // Compute stats
     const totalItemsCount = 1280 + stockItems.length;
     const activeCount = 1102 + stockItems.filter((i) => i.stock > 0).length;
     const alertCount = 12 + stockItems.filter((i) => i.stock > 0 && i.stock <= 3).length;
@@ -826,7 +873,6 @@ export default function IncomingOrdersScreen({ route, navigation }: Props) {
     );
   };
 
-  // Tab 4: Profile / Store management tab
   const renderProfileTab = () => {
     return (
       <View style={styles.centerContainer}>
@@ -1089,7 +1135,6 @@ const styles = StyleSheet.create({
     zIndex: 1,
   },
 
-  // Store status switch
   storeStatusCard: {
     flexDirection: 'row',
     justifyContent: 'space-between',
@@ -1133,7 +1178,6 @@ const styles = StyleSheet.create({
     marginTop: 2,
   },
 
-  // Today's Performance & Sales
   salesBannerCard: {
     flexDirection: 'row',
     justifyContent: 'space-between',
@@ -1170,7 +1214,6 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
 
-  // Capacities half width stats
   twoColRow: {
     flexDirection: 'row',
     gap: 12,
@@ -1202,7 +1245,6 @@ const styles = StyleSheet.create({
     fontWeight: '500',
   },
 
-  // Section titles
   sectionHeader: {
     flexDirection: 'row',
     justifyContent: 'space-between',
@@ -1236,7 +1278,6 @@ const styles = StyleSheet.create({
     color: Colors.primary,
   },
 
-  // Action Order Cards
   actionOrderCard: {
     backgroundColor: '#FFF',
     borderRadius: 20,
@@ -1331,7 +1372,6 @@ const styles = StyleSheet.create({
     color: '#8A84A0',
   },
 
-  // Goal tracker card
   goalCard: {
     backgroundColor: '#E8E5EA',
     borderRadius: 24,
@@ -1402,7 +1442,6 @@ const styles = StyleSheet.create({
     backgroundColor: 'rgba(0, 0, 0, 0.08)',
   },
 
-  // Bottom Grid Menu
   quickGrid: {
     flexDirection: 'row',
     gap: 10,
@@ -1432,38 +1471,38 @@ const styles = StyleSheet.create({
     color: '#1A1135',
   },
 
-  // Active Orders queue count stats
   statsRow: {
     flexDirection: 'row',
-    gap: 12,
+    gap: 8,
     marginBottom: 20,
   },
   statBox: {
     flex: 1,
-    borderRadius: 20,
-    padding: 16,
+    flexBasis: 0,
+    flexShrink: 1,
+    borderRadius: 16,
+    padding: 10,
     justifyContent: 'space-between',
-    minHeight: 100,
+    minHeight: 80,
   },
   statBoxTop: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 8,
+    gap: 4,
   },
   statBoxLabel: {
-    fontSize: 11,
+    fontSize: 10,
     fontWeight: '800',
     color: Colors.white,
-    letterSpacing: 1,
+    letterSpacing: 0.5,
   },
   statBoxNumber: {
-    fontSize: 32,
+    fontSize: 28,
     fontWeight: '800',
     color: Colors.white,
-    marginTop: 12,
+    marginTop: 8,
   },
 
-  // Active Order Queue Card
   card: {
     backgroundColor: '#FFF',
     borderRadius: 24,
@@ -1575,8 +1614,6 @@ const styles = StyleSheet.create({
     textAlign: 'center',
   },
 
-  // ─── SEARCH / INVENTORY STYLES ──────────────────────────────────────────
-
   inventorySearchBar: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -1651,7 +1688,6 @@ const styles = StyleSheet.create({
     color: '#1A1135',
   },
 
-  // Inventory Cards List
   inventoryItemCard: {
     backgroundColor: '#FFF',
     borderRadius: 20,
@@ -1768,7 +1804,6 @@ const styles = StyleSheet.create({
     elevation: 4,
   },
 
-  // Modal Dialog Form overlay
   modalBackdrop: {
     flex: 1,
     backgroundColor: 'rgba(26, 17, 53, 0.65)',
@@ -1831,7 +1866,6 @@ const styles = StyleSheet.create({
     fontWeight: '800',
   },
 
-  // General tab placeholders
   placeholderTitle: {
     fontSize: 18,
     fontWeight: '800',
@@ -1879,7 +1913,6 @@ const styles = StyleSheet.create({
     color: Colors.error,
   },
 
-  // Bottom Tab Bar
   bottomTabBarContainer: {
     position: 'absolute',
     bottom: 0,
@@ -1917,5 +1950,56 @@ const styles = StyleSheet.create({
     fontSize: 10,
     color: '#1A1135',
     fontWeight: '800',
+  },
+  statusPillBlue: {
+    backgroundColor: '#EFF6FF',
+    borderColor: '#3B82F6',
+  },
+  statusPillTextBlue: {
+    color: '#3B82F6',
+  },
+  statusPillGray: {
+    backgroundColor: '#F1F5F9',
+    borderColor: '#94A3B8',
+  },
+  statusPillTextGray: {
+    color: '#64748B',
+  },
+  waitingDriverContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: '#EFF6FF',
+    borderWidth: 1,
+    borderColor: '#BFDBFE',
+    borderRadius: 12,
+    paddingVertical: 12,
+    paddingHorizontal: 16,
+    gap: 8,
+    justifyContent: 'center',
+  },
+  waitingDriverText: {
+    fontSize: 12,
+    fontWeight: '700',
+    color: '#1E40AF',
+  },
+  historySection: {
+    marginTop: 28,
+    borderTopWidth: 1,
+    borderTopColor: Colors.borderLight,
+    paddingTop: 20,
+  },
+  historySectionTitle: {
+    fontSize: 16,
+    fontWeight: '800',
+    color: Colors.textPrimary,
+    marginBottom: 14,
+  },
+  historyCard: {
+    opacity: 0.8,
+    backgroundColor: '#FAF9FF',
+  },
+  historyDetailsText: {
+    fontSize: 13,
+    color: Colors.textSecondary,
   },
 });

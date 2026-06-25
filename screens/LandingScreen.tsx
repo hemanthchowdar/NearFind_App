@@ -24,7 +24,7 @@ type Props = NativeStackScreenProps<RootStackParamList, 'Landing'>;
 const { width } = Dimensions.get('window');
 
 export default function LandingScreen({ navigation }: Props) {
-  // ─── State for modals ──────────────────────────────────────────────────────
+  
   const [showCustomerModal, setShowCustomerModal] = useState(false);
   const [showRetailerModal, setShowRetailerModal] = useState(false);
   const [showDeliveryModal, setShowDeliveryModal] = useState(false);
@@ -34,7 +34,6 @@ export default function LandingScreen({ navigation }: Props) {
   const [deliveryPartners, setDeliveryPartners] = useState<DeliveryPartner[]>([]);
   const [loading, setLoading] = useState(false);
 
-  // Pre-fetch retailers & delivery partners on mount
   useEffect(() => {
     (async () => {
       try {
@@ -47,7 +46,6 @@ export default function LandingScreen({ navigation }: Props) {
     })();
   }, []);
 
-  // ─── Role card definitions ────────────────────────────────────────────────
   const roles = [
     {
       key: 'customer',
@@ -91,7 +89,6 @@ export default function LandingScreen({ navigation }: Props) {
     },
   ];
 
-  // ─── Render ───────────────────────────────────────────────────────────────
   return (
     <SafeAreaView style={styles.safeArea}>
       <StatusBar barStyle="dark-content" backgroundColor={Colors.background} />
@@ -299,8 +296,6 @@ export default function LandingScreen({ navigation }: Props) {
   );
 }
 
-// ─── Styles ─────────────────────────────────────────────────────────────────
-
 const styles = StyleSheet.create({
   safeArea: {
     flex: 1,
@@ -314,7 +309,6 @@ const styles = StyleSheet.create({
     paddingTop: 12,
   },
 
-  // Header
   header: {
     flexDirection: 'row',
     justifyContent: 'space-between',
@@ -344,7 +338,6 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
 
-  // Hero
   heroSection: {
     alignItems: 'center',
     marginBottom: 28,
@@ -392,7 +385,6 @@ const styles = StyleSheet.create({
     maxWidth: 300,
   },
 
-  // Role cards
   roleCard: {
     backgroundColor: Colors.surface,
     borderRadius: 16,
@@ -403,7 +395,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'flex-start',
     overflow: 'hidden',
-    // subtle shadow
+    
     shadowColor: '#6C2BD9',
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.05,
@@ -452,7 +444,6 @@ const styles = StyleSheet.create({
     opacity: 0.25,
   },
 
-  // Banner
   bannerContainer: {
     marginTop: 8,
     borderRadius: 16,
@@ -492,7 +483,6 @@ const styles = StyleSheet.create({
     fontWeight: '600',
   },
 
-  // Modals
   modalOverlay: {
     flex: 1,
     backgroundColor: 'rgba(26, 17, 53, 0.5)',

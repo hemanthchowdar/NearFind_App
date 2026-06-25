@@ -14,7 +14,6 @@ export default function CustomerHomeScreen({ route, navigation }: Props) {
   const { customerName } = route.params;
   const [searchQuery, setSearchQuery] = useState('');
 
-  // 8 Categories as per screenshot
   const categories = [
     { label: 'Fruits & Veg', icon: 'leaf-outline', color: '#10B981' },
     { label: 'Dairy & Bread', icon: 'water-outline', color: '#3B82F6' },
@@ -26,9 +25,8 @@ export default function CustomerHomeScreen({ route, navigation }: Props) {
     { label: 'Meat', icon: 'cube-outline', color: '#F97316' },
   ];
 
-  // Action helper when tapping "Add" or items to purchase
   const handleQuickBuy = (itemName: string) => {
-    // Navigate directly to Search screen with query populated, or carry out a direct search action
+    
     navigation.navigate('CustomerSearch', { customerName });
   };
 
@@ -565,4 +563,3 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
 });
-
