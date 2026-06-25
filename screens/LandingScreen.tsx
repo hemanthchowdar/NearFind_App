@@ -10,6 +10,7 @@ import {
   StatusBar,
   Dimensions,
   FlatList,
+  Alert,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons, MaterialCommunityIcons, Feather } from '@expo/vector-icons';
@@ -27,7 +28,7 @@ export default function LandingScreen({ navigation }: Props) {
   const [showCustomerModal, setShowCustomerModal] = useState(false);
   const [showRetailerModal, setShowRetailerModal] = useState(false);
   const [showDeliveryModal, setShowDeliveryModal] = useState(false);
-  const [customerName, setCustomerName] = useState('Priya');
+  const [customerName, setCustomerName] = useState('');
 
   const [retailers, setRetailers] = useState<Retailer[]>([]);
   const [deliveryPartners, setDeliveryPartners] = useState<DeliveryPartner[]>([]);
@@ -193,9 +194,14 @@ export default function LandingScreen({ navigation }: Props) {
             <TouchableOpacity
               style={styles.modalPrimaryBtn}
               onPress={() => {
+                const name = customerName.trim();
+                if (!name) {
+                  Alert.alert('Name Required', 'Please enter your name to continue.');
+                  return;
+                }
                 setShowCustomerModal(false);
                 navigation.navigate('CustomerTabs', {
-                  customerName: customerName.trim() || 'Priya',
+                  customerName: name,
                 });
               }}
             >
