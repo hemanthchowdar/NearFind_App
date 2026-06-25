@@ -90,6 +90,50 @@ export async function getStockForProduct(productId: string): Promise<RetailerSto
   }));
 }
 
+/** Subscribe to all stock items for a specific retailer, enriched with product name */
+export function subscribeToRetailerStock(
+  retailerId: string,
+  callback: (stock: (RetailerStock & { productName: string })[]) => void
+): () => void {
+  const q = query(retailerStockCol, where('retailerId', '==', retailerId));
+  return onSnapshot(q, async (snap) => {
+    const stocks: RetailerStock[] = snap.docs.map((d) => ({ id: d.id, ...d.data() } as RetailerStock));
+    // Fetch products to map names
+    const products = await getAllProducts();
+    const productMap = new Map(products.map((p) => [p.id, p.name]));
+    
+    const enriched = stocks.map((s) => ({
+      ...s,
+      productName: productMap.get(s.productId) ?? 'Unknown Product',
+    }));
+    callback(enriched);
+  });
+}
+
+/** Update retailer stock item quantity */
+export async function updateStockQty(stockId: string, newStock: number): Promise<void> {
+  const ref = doc(retailerStockCol, stockId);
+  await updateDoc(ref, { stock: newStock });
+}
+
+/** Add a new product to retailer's stock */
+export async function addRetailerProduct(
+  retailerId: string,
+  productName: string,
+  price: number,
+  stock: number
+): Promise<void> {
+  // First, add the product to products collection
+  const prodRef = await addDoc(productsCol, { name: productName });
+  // Second, add to retailerStock
+  await addDoc(retailerStockCol, {
+    retailerId,
+    productId: prodRef.id,
+    price,
+    stock,
+  });
+}
+
 // ─── Orders ─────────────────────────────────────────────────────────────────
 
 /**
