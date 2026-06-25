@@ -187,6 +187,26 @@ export function subscribeToRetailerOrders(
 }
 
 /**
+ * Subscribe to orders for a specific customer. Returns an unsubscribe function.
+ */
+export function subscribeToCustomerOrders(
+  customerName: string,
+  callback: (orders: Order[]) => void
+): () => void {
+  const q = query(ordersCol, where('customerName', '==', customerName));
+  return onSnapshot(q, (snap) => {
+    const orders = snap.docs.map((d) => ({ id: d.id, ...d.data() } as Order));
+    // Sort most recent first
+    orders.sort((a, b) => {
+      const aTime = a.createdAt?.toMillis ? a.createdAt.toMillis() : new Date(a.createdAt as any).getTime();
+      const bTime = b.createdAt?.toMillis ? b.createdAt.toMillis() : new Date(b.createdAt as any).getTime();
+      return bTime - aTime;
+    });
+    callback(orders);
+  });
+}
+
+/**
  * Subscribe to orders ready for pickup (no delivery partner assigned).
  */
 export function subscribeToAvailableDeliveries(

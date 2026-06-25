@@ -13,12 +13,13 @@ import { initializeApp } from 'firebase/app';
 import { getFirestore } from 'firebase/firestore';
 
 const firebaseConfig = {
-  apiKey: 'YOUR_API_KEY',
-  authDomain: 'YOUR_PROJECT.firebaseapp.com',
-  projectId: 'YOUR_PROJECT_ID',
-  storageBucket: 'YOUR_PROJECT.appspot.com',
-  messagingSenderId: 'YOUR_SENDER_ID',
-  appId: 'YOUR_APP_ID',
+  apiKey: "AIzaSyCAttfWkCpnf75mrPt9_2aKKgYsqfAsGBM",
+  authDomain: "near-find.firebaseapp.com",
+  projectId: "near-find",
+  storageBucket: "near-find.firebasestorage.app",
+  messagingSenderId: "674197646920",
+  appId: "1:674197646920:web:a30ef78d328479dc9bb27d",
+  measurementId: "G-GJPE8RZJ9P"
 };
 
 const app = initializeApp(firebaseConfig);

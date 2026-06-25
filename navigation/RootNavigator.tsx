@@ -13,6 +13,7 @@ import ResultsScreen from '../screens/customer/ResultsScreen';
 import ConfirmOrderScreen from '../screens/customer/ConfirmOrderScreen';
 import OrderStatusScreen from '../screens/customer/OrderStatusScreen';
 import ProfileScreen from '../screens/customer/ProfileScreen';
+import CustomerOrdersScreen from '../screens/customer/CustomerOrdersScreen';
 import IncomingOrdersScreen from '../screens/retailer/IncomingOrdersScreen';
 import AvailableOrdersScreen from '../screens/delivery/AvailableOrdersScreen';
 import AdminScreen from '../screens/admin/AdminScreen';
@@ -64,8 +65,8 @@ function CustomerTabNavigator({ route }: any) {
           ),
         }}
       >
-        {() => (
-          <ProfileScreen customerName={customerName} navigation={null} />
+        {(props) => (
+          <CustomerOrdersScreen customerName={customerName} navigation={props.navigation} />
         )}
       </Tab.Screen>
 
